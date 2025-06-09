@@ -1,12 +1,14 @@
 import SwiftUI
+import SwiftData
 
 struct ScrumsView: View {
-    @Binding var scrums: [DailyScrum]
+    @Query(sort: \DailyScrum.title) private var scrums: [DailyScrum]
+    @State private var isPresentingNewScrumView = false
     
     var body: some View {
         NavigationStack {
-            List($scrums) { $scrum in
-                NavigationLink(destination: DetailView(scrum: $scrum)) {
+            List(scrums) { scrum in
+                NavigationLink(destination: DetailView(scrum: scrum)) {
                     CardView(scrum: scrum)
                         .listRowBackground(scrum.theme.mainColor)
                 }
@@ -14,16 +16,20 @@ struct ScrumsView: View {
             }
             .navigationTitle("Daily Scrums")
             .toolbar {
-                Button(action: {}) {
+                Button(action: {
+                    isPresentingNewScrumView = true
+                }) {
                     Image(systemName: "plus")
                 }
                 .accessibilityLabel("New Scrum")
             }
         }
+        .sheet(isPresented: $isPresentingNewScrumView) {
+            NewScrumSheet()
+        }
     }
 }
 
-#Preview {
-    @Previewable @State var scrums = DailyScrum.sampleData
-    ScrumsView(scrums: $scrums)
+#Preview(traits: .dailyScrumsSampleData) {
+    ScrumsView()
 }
